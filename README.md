@@ -1,29 +1,71 @@
-# ruby-docker-boilerplate
+# python-docker-boilerplate
 
-Boilerplate code for starting a ruby project with docker / docker-compose
+Boilerplate code for starting a python project with docker and docker-compose
 
-## Set up
+## How to set up your python environment
 
-Run the setup script
+### Install python
+
+On mac,
+
+* You can read this blog to install python in a right way in
+      python: https://opensource.com/article/19/5/python-3-default-mac
+      
+* **Recommendation**: Install python using brew and pyenv
+
+### Managing python dependencies
+
+* **Install poetry**
+
+* On Mac OS, Windows and Linux,
+  * Install poetry:
+       * ``curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python``
+       * ```poetry init```: 
+         * Use this command to set up your local environment, repository details, and dependencies. 
+         * It will generate a pyproject.toml file with the information you provide.
+           * Package name [python-starter]:
+           * Version [0.1.0]:
+           * Description []:
+           * Author []:  n 
+           * License []:
+           * Compatible Python versions [^3.11]: 
+           * Would you like to define your main dependencies interactively? (yes/no) [yes]: no
+           * Would you like to define your development dependencies interactively? (yes/no) no
+       * ```poetry install```: 
+         * Use this command to automatically install the dependencies specified in the pyproject.toml file.
+         * It will generate a poetry.lock file with the dependencies and their versions.
+         * It will create a virtual environment in the home directory, e.g. /Users/user_name/Library/Caches/pypoetry/..
+       * ```poetry env use python```: 
+         * Use this command to find the virtual environment directory, created by poetry.
+       * ```source ~/Library/Caches/pypoetry/virtualenvs/python-starter-0xoBsgdA-py3.11/bin/activate```
+         * Use this command to activate the virtual environment.
+       * ```poetry shell```: 
+         * Use this command to activate the virtual environment.
+       * ```poetry add pytest```: 
+         * Use this command to add dependencies.
+       * `` poetry update ``: 
+         * Use this command if you change your .toml file and want to generate a new version the .lock file
+
+## Set up in a docker environment
+
 ```
 ./init.sh
 ```
 
 This will:
 
-* copy `env.example` to `.env` 
-* enable the precommit hook which wil lint the code before committing.  Uncomment
-  those lines in `.git/hooks/precommit` to enable running tests.
+* copy the project folder
 * build the docker image
-* install the gems
+* install the dependencies
+* create a container with the application
 
-The script does not overwrite `.env` or `/git/hooks/precommit`.
+## How to run the application
+
+``docker compose exec app python --version``
+
 
 ## Tests
-This has rspec initialialized and has one sample test in `spec/sample_spec.rb`. 
-
-A github actions workflow is included that runs standard linting and the tests
 
 ## Background
 This repository goes with this documentation:
-https://mlit.atlassian.net/wiki/spaces/LD/pages/2404090314/Getting+Started+with+Docker+and+Docker-Compose 
+https://mlit.atlassian.net/wiki/spaces/LD/pages/10092544004/Python+in+LIT

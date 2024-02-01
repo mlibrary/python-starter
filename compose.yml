@@ -5,9 +5,7 @@ services:
       target: development
     volumes:
       - .:/app
-      - gem_cache:/gems
-    env_file:
-      - .env
-        
+    tty: true
+    stdin_open: true
 volumes:
-  gem_cache:
+  app:
