@@ -1,5 +1,3 @@
-#FROM ruby:3.2 AS development
-
 #PYTHON image
 # Use the official Docker Python image because it has the absolute latest bugfix version of Python
 # it has the absolute latest system packages
@@ -32,7 +30,7 @@ RUN set -ex \
     && addgroup --system --gid 1001 appgroup \
     && adduser --system --uid 1001 --gid 1001 --no-create-home appuser
 
-    # Upgrade the package index and install security upgrades
+# Upgrade the package index and install security upgrades
 RUN --mount=type=cache,target=/var/lib/apt/lists \
     --mount=type=cache,target=/var/cache,sharing=locked \
     apt-get update \
