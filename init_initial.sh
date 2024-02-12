@@ -5,7 +5,7 @@
 #docker compose build --build-arg ENVIRONMENT="$ENVIRONMENT"
 
 echo "🚢 Build docker images"
-DOCKER_BUILDKIT=1 docker build --target=runtime .
+docker compose build
 
 echo "📦 Starting python app"
 docker compose up -d app

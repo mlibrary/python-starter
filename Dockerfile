@@ -1,3 +1,4 @@
+#Dockerfile created following this blog post: https://medium.com/@albertazzir/blazing-fast-python-docker-builds-with-poetry-a78a66f5aed0
 #PYTHON image
 # Use the official Docker Python image because it has the absolute latest bugfix version of Python
 # it has the absolute latest system packages
@@ -6,57 +7,30 @@
 
 #I did not recommed to use alpine image because it lacks the package installer pip and the support for installing
 #wheel packages, which are both needed for installing applications like Pandas and Numpy.
-FROM python:3.11-slim-bookworm as python-base
+FROM python:3.11-slim-bookworm as builder
 
-# Use this page as a reference for python and poetry environment variables: https://docs.python.org/3/using/cmdline.html#envvar-PYTHONUNBUFFERED
+RUN pip install poetry==1.5.1
 
-#Ensure the stdout and stderr streams are sent straight to terminal, then you can see the output of your application
-ENV PYTHONUNBUFFERED=1\
-    # Avoid the generation of .pyc files during package install
-    # Disable pip's cache, then reduce the size of the image
-    PIP_NO_CACHE_DIR=off \
-    # Save runtime because it is not look for updating pip version
-    PIP_DISABLE_PIP_VERSION_CHECK=on \
-    PIP_DEFAULT_TIMEOUT=100
-
-USER root
+ENV POETRY_NO_INTERACTION=1 \
+    #POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    #POETRY_VIRTUALENVS_CREATE=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
 
 WORKDIR /app
 
-ENV PYTHONPATH "${PYTHONPATH}:/app"
+COPY pyproject.toml poetry.lock ./
 
-RUN set -ex \
-    # Create a non-root user
-    && addgroup --system --gid 1001 appgroup \
-    && adduser --system --uid 1001 --gid 1001 --no-create-home appuser
+# Avoid installing development dependencies with poetry install --without dev , as you won’t need linters and tests suites in your production environment.
+#To avoid poetry re-install the dependencies use the --no-root option, which instructs Poetry to avoid installing the current project into the virtual environment.
+RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
 
-# Upgrade the package index and install security upgrades
-RUN --mount=type=cache,target=/var/lib/apt/lists \
-    --mount=type=cache,target=/var/cache,sharing=locked \
-    apt-get update \
-    && apt-get upgrade --assume-yes \
-    && apt-get install --assume-yes --no-install-recommends python3-pip
+FROM python:3.11-slim-bookworm as runtime
 
-# Install dependencies
-FROM python-base as poetry
+#ENV VIRTUAL_ENV=/app/.venv \
+#    PATH="/app/.venv/bin:$PATH"
 
-WORKDIR /app
-# that contains poetry=<version> to install a specific version of Poetry.
-COPY requirements.txt ./
-RUN --mount=type=cache,target=/root/.cache python3.11 -m pip install --disable-pip-version-check --requirement=requirements.txt
-
-# Do the conversion
-COPY poetry.lock pyproject.toml ./
-RUN poetry export --output=requirements.txt
-
-FROM python-base as development
-
-RUN --mount=type=cache,target=/root/.cache --mount=type=bind,from=poetry,source=/app,target=/poetry python3.11 -m pip install --disable-pip-version-check --no-deps --requirement=/poetry/requirements.txt
-
-WORKDIR /app
+#COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 COPY . .
 
 CMD ["python3"]
-
-USER appuser
