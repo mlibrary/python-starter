@@ -2,10 +2,15 @@ services:
   app:
     build: 
       context: .
-      #target: development
+      target: runtime
+      args:
+        DEV: true
     volumes:
       - .:/app
+      - .:/tmp:rm
     tty: true
     stdin_open: true
 volumes:
   app:
+  tmp:
+
