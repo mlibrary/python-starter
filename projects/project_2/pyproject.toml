@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "project-2"
+version = "0.1.0"
+description = "A second example of a project in a monorepo"
+authors = ["Lianet Sepulveda Torres <lisepul@umich.edu>"]
+readme = "README.md"
+packages = [{include = "project_2"},
+    { include = "my_logger", from = "../../shared_libs/my_logger" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+my-logger = {path = "../../shared_libs/my_logger"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

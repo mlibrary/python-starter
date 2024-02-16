@@ -8,6 +8,7 @@ packages = [{include = "python_starter"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+black = "^24.2.0"
 
 
 [build-system]

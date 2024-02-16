@@ -1,0 +1,16 @@
+services:
+  project_1:
+    build: 
+      context: ../../.
+      target: builder
+      args:
+        DEV: true
+    volumes:
+      - .:/project_1
+      - .:/tmp:rm
+    tty: true
+    stdin_open: true
+volumes:
+  project_1:
+  tmp:
+

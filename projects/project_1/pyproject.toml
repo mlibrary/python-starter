@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "project-1"
+version = "0.1.0"
+description = "Project schema 1"
+authors = ["Lianet Sepulveda Torres <lisepul@umich.edu>"]
+readme = "README.md"
+packages = [{include = "project_1"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+my-conn = {path = "../../shared_libs/my_conn"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
