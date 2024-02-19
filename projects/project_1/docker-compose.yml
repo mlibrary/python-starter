@@ -2,10 +2,11 @@ services:
   project_1:
     build: 
       context: ../../.
-      target: builder
+      target: runtime
       dockerfile: projects/project_1/Dockerfile
       args:
-        DEV: true
+        DEV: ${DEV:-false}
+        POETRY_VERSION: ${POETRY_VERSION:-1.5.1}
     volumes:
       - .:/project_1
       - .:/tmp:rm
