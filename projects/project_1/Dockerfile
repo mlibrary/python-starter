@@ -12,28 +12,28 @@
 FROM python:3.11-slim-bookworm as base
 
 # Create a system group named "user" with the -r flag
-RUN groupadd -r project_1_user \
+#RUN groupadd -r project_1_user \
     # Create a system user named "user" with the -r flag
-    && useradd -r -g project_1_user project_1_user
+#    && useradd -r -g project_1_user project_1_user
 
 # Set the working directory to /app
 WORKDIR /app
 
 # Change the ownership of the working directory to the non-root user "user"
-RUN chown -R project_1_user:project_1_user /app
+#RUN chown -R project_1_user:project_1_user /app
 
 # Switch to the non-root user "user"
-USER project_1_user
+#USER project_1_user
 
 #Use this argument to install development or production dependencies
 #true = development / false = production
 ARG DEV=true
 
-RUN python -m venv .venv
-RUN source .venv/bin/activate
+#RUN python -m venv .venv
+#RUN source .venv/bin/activate
 
-ENV VIRTUAL_ENV=/app/.venv \
-    PATH="/app/.venv/bin:$PATH"
+#ENV VIRTUAL_ENV=/app/.venv \
+#    PATH="/app/.venv/bin:$PATH"
 
 # Install Poetry
 ARG POETRY_VERSION=1.5.1
@@ -55,16 +55,17 @@ ENV PYTHONUNBUFFERED=1\
     PIP_DEFAULT_TIMEOUT=100 \
     # Disable poetry interaction
     POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_IN_PROJECT=1 \
-    POETRY_VIRTUALENVS_CREATE=1 \
+    #POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    #POETRY_VIRTUALENVS_CREATE=1 \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
+RUN whoami
 
 # Install Poetry. Fix poetry version to avoid breaking changes
 RUN pip install poetry==1.5.1
 
 # Install general dependencies (formatter and linting tools)
-COPY ../../pyproject.toml ../../poetry.lock app/
+COPY pyproject.toml poetry.lock app/
 
 #Poetry cache is used to avoid installing the dependencies every time the code changes, we will keep this folder in development environment and remove it in production
 # --no-root, poetry will install only the dependencies avoiding to install the project itself, we will install the project in the final layer
@@ -80,7 +81,7 @@ RUN  if [ $DEV ]; then \
    fi
 
 #Install specific project dependencies
-COPY ../../shared_libs   shared_libs/
+COPY shared_libs   /app/shared_libs
 
 # Install the app. Just copy the files needed to install the dependencies
 COPY pyproject.toml poetry.lock projects/project_1/
@@ -98,9 +99,9 @@ RUN  if [ $DEV ]; then \
 FROM base as runtime
 
 WORKDIR /app
-COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+#COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-COPY . ./projects/project_1/
+COPY /projects/project_1 /app/projects/project_1/
 
 WORKDIR /app
 
