@@ -12,15 +12,15 @@
 FROM python:3.11-slim-bookworm as base
 
 # Create a system group named "user" with the -r flag
-#RUN groupadd -r project_1_user \
+RUN groupadd -r project_1_user \
     # Create a system user named "user" with the -r flag
-#    && useradd -r -g project_1_user project_1_user
+    && useradd -r -g project_1_user project_1_user
 
 # Set the working directory to /app
 WORKDIR /app
 
 # Change the ownership of the working directory to the non-root user "user"
-#RUN chown -R project_1_user:project_1_user /app
+RUN chown -R project_1_user:project_1_user /app
 
 # Switch to the non-root user "user"
 #USER project_1_user
@@ -40,6 +40,8 @@ ARG POETRY_VERSION=1.5.1
 
 # The builder layer is used to install all the dependencies, then if the code change we do not need to reinstall the dependencies
 FROM base as builder
+COPY --from=base /app /app
+COPY --from=base usr/local/bin/python3.11 /usr/local/bin/python3.11
 
 WORKDIR /app
 
@@ -64,20 +66,21 @@ RUN whoami
 # Install Poetry. Fix poetry version to avoid breaking changes
 RUN pip install poetry==1.5.1
 
-# Install general dependencies (formatter and linting tools)
-COPY pyproject.toml poetry.lock app/
-
+# Copy general dependencies (formatter and linting tools) to app folder
+COPY pyproject.toml poetry.lock ./
+#--mount=type=cache,target=$POETRY_CACHE_DIR
 #Poetry cache is used to avoid installing the dependencies every time the code changes, we will keep this folder in development environment and remove it in production
 # --no-root, poetry will install only the dependencies avoiding to install the project itself, we will install the project in the final layer
 # --without dev to avoid installing dev dependencies, we do not need test and linters in production environment
 # --with dev to install dev dependencies, we need test and linters in development environment
 # --mount, mount a folder for plugins with poetry cache, this will speed up the process of building the image
+
 RUN  if [ $DEV ]; then \
     echo "Installing dev dependencies"; \
-      --mount=type=cache,target=$POETRY_CACHE_DIR  poetry install --with dev --no-root; \
+      --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --with dev --no-root; \
     else \
    echo "Skipping dev dependencies"; \
-      --mount=type=cache,target=$POETRY_CACHE_DIR  poetry install --without dev --no-root && rm -rf $POETRY_CACHE_DIR; \
+      --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root && rm -rf $POETRY_CACHE_DIR; \
    fi
 
 #Install specific project dependencies
@@ -87,16 +90,18 @@ COPY shared_libs   /app/shared_libs
 COPY pyproject.toml poetry.lock projects/project_1/
 
 # Install project dependencies
-RUN  if [ $DEV ]; then \
-    echo "Installing dev dependencies"; \
-      --mount=type=cache,target=$POETRY_CACHE_DIR  poetry install --with dev --no-root; \
-    else \
-   echo "Skipping dev dependencies"; \
-      --mount=type=cache,target=$POETRY_CACHE_DIR  poetry install --without dev --no-root && rm -rf $POETRY_CACHE_DIR; \
-   fi
+#RUN  if [ $DEV ]; then \
+#    echo "Installing dev dependencies"; \
+#      --mount=type=cache,target=$POETRY_CACHE_DIR  poetry install --with dev --no-root; \
+#    else \
+#   echo "Skipping dev dependencies"; \
+#      --mount=type=cache,target=$POETRY_CACHE_DIR  poetry install --without dev --no-root && rm -rf $POETRY_CACHE_DIR; \
+#   fi
 
 #setup our final runtime layer
 FROM base as runtime
+
+COPY --from=builder /app /app
 
 WORKDIR /app
 #COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
@@ -105,4 +110,5 @@ COPY /projects/project_1 /app/projects/project_1/
 
 WORKDIR /app
 
-CMD ["python3"]
+#CMD ["python3"]
+CMD ["/bin/bash"]

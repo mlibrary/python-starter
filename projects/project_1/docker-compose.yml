@@ -3,6 +3,7 @@ services:
     build: 
       context: ../../.
       target: builder
+      dockerfile: projects/project_1/Dockerfile
       args:
         DEV: true
     volumes:

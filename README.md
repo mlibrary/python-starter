@@ -172,3 +172,14 @@ Packaging namespace packages: https://packaging.python.org/en/latest/guides/pack
 src layout: https://setuptools.pypa.io/en/latest/userguide/package_discovery.html#src-layout
 
 We use src folder to include the code base of each project or library. This way, poetry automaticaly is able to find and install the dependencies
+
+# How to run project 1 inside the monorepo with docker:
+
+### Go to the root of the repository and run the following command:
+
+```cd projects/project_1 docker compose up```
+
+### Go to the root of the repository and run the following command:
+
+Command line to run the container: `docker run -it project_1 /bin/bash`
+Build the image: `docker build . -f projects/project_1/Dockerfile -t project_1 --target builder`
