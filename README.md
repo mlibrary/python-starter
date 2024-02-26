@@ -45,6 +45,8 @@ On mac,
          * Use this command to activate the virtual environment.
        * ```poetry add pytest```: 
          * Use this command to add dependencies.
+       * ```poetry add --dev pytest```:
+         * Use this command to add development dependencies.
        * `` poetry update ``: 
          * Use this command if you change your .toml file and want to generate a new version the .lock file
 

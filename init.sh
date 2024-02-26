@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-echo "📦 Starting python app"
+echo "📦 Set up a python application"
 docker compose up -d app
