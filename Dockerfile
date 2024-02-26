@@ -74,6 +74,6 @@ WORKDIR /app
 COPY . /app
 
 # Activate the virtual environment
-CMD . /app/venv/bin/activate
+ENTRYPOINT . /app/venv/bin/activate
 
 CMD ["tail", "-f", "/dev/null"]
