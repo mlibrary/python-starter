@@ -16,7 +16,6 @@ ARG POETRY_VERSION
 # true = development / false = production
 ARG DEV
 
-
 # Set the working directory to /app
 WORKDIR /app
 
@@ -31,8 +30,8 @@ ENV PYTHONUNBUFFERED=1\
     PIP_DEFAULT_TIMEOUT=100 \
     # Disable poetry interaction
     POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_IN_PROJECT=1 \
     POETRY_VIRTUALENVS_CREATE=1 \
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
 RUN pip install poetry==${POETRY_VERSION}
@@ -59,15 +58,19 @@ FROM python:3.11-slim-bookworm as runtime
 ARG UID=1000
 ARG GID=1000
 
-ENV VIRTUAL_ENV=/app/.venv \
-    PATH="/app/.venv/bin:$PATH"
-
-COPY --from=base ${VIRTUAL_ENV} ${VIRTUAL_ENV}
-
 # Create our users here in the last layer or else it will be lost in the previous discarded layers
 # Create a system group named "app_user" with the -r flag
 RUN groupadd -g ${GID} -o app
 RUN useradd -m -d /app -u ${UID} -g ${GID} -o -s /bin/bash app
+RUN mkdir -p /venv && chown ${UID}:${GID} /venv
+RUN which pip && sleep 10
+
+# By adding /venv/bin to the PATH the dependencies in the virtual environment
+# are used
+ENV VIRTUAL_ENV=/venv \
+    PATH="/venv/bin:$PATH"
+
+COPY --chown=${UID}:${GID} --from=base "/app/.venv" ${VIRTUAL_ENV}
 
 # Switch to the non-root user "user"
 USER app
@@ -75,8 +78,5 @@ USER app
 WORKDIR /app
 
 COPY --chown=${UID}:${GID} . /app
-
-# Activate the virtual environment
-ENTRYPOINT . /app/.venv/bin/activate
 
 CMD ["tail", "-f", "/dev/null"]
