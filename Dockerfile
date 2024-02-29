@@ -16,6 +16,7 @@ ARG POETRY_VERSION
 # true = development / false = production
 ARG DEV
 
+
 # Set the working directory to /app
 WORKDIR /app
 
@@ -55,6 +56,9 @@ RUN if [ {${DEV}} ]; then \
 # Set up our final runtime layer
 FROM python:3.11-slim-bookworm as runtime
 
+ARG UID=1000
+ARG GID=1000
+
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
 
@@ -62,18 +66,17 @@ COPY --from=base ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 # Create our users here in the last layer or else it will be lost in the previous discarded layers
 # Create a system group named "app_user" with the -r flag
-RUN groupadd -r app_user \
-    # Create a system user named "app_user" with the -r flag
-    && useradd -r -g app_user app_user
+RUN groupadd -g ${GID} -o app
+RUN useradd -m -d /app -u ${UID} -g ${GID} -o -s /bin/bash app
 
 # Switch to the non-root user "user"
-USER app_user
+USER app
 
 WORKDIR /app
 
-COPY . /app
+COPY --chown=${UID}:${GID} . /app
 
 # Activate the virtual environment
-ENTRYPOINT . /app/venv/bin/activate
+ENTRYPOINT . /app/.venv/bin/activate
 
 CMD ["tail", "-f", "/dev/null"]
