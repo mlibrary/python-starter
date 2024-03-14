@@ -19,7 +19,9 @@ On mac,
 
 * On Mac OS, Windows and Linux,
   * Install poetry:
-       * ``curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python``
+       * ``curl -sSL https://install.python-poetry.org | python3 -``
+         * This way allows poetry and its dependencies to be isolated from your dependencies. I don't recommend to use 
+         * pip to install poetry because poetry and your application dependencies will be installed in the same environment.
        * ```poetry init```: 
          * Use this command to set up your local environment, repository details, and dependencies. 
          * It will generate a pyproject.toml file with the information you provide.
@@ -43,6 +45,8 @@ On mac,
          * Use this command to activate the virtual environment.
        * ```poetry add pytest```: 
          * Use this command to add dependencies.
+       * ```poetry add --dev pytest```:
+         * Use this command to add development dependencies.
        * `` poetry update ``: 
          * Use this command if you change your .toml file and want to generate a new version the .lock file
 
