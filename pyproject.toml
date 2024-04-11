@@ -8,7 +8,12 @@ packages = [{include = "python_starter"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+requests = "^2.31.0"
 
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.2"
+ruff = "^0.2.2"
 
 [build-system]
 requires = ["poetry-core"]
