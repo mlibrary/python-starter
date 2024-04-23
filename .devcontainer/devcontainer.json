@@ -1,0 +1,25 @@
+{
+    
+    "build": {
+        "dockerfile": "../Dockerfile",
+        "context": ".."
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python"
+            ],
+        "settings": {
+            "python.testing.pytestEnabled": true,
+            "python.testing.pytestPath": "pytest",
+            "python.linting.pylintEnabled": true,
+            "python.linting.pylintPath": "ruff",
+            "python.linting.pylintArgs": [
+                "--disable=all",
+                "--enable=F,E,unreachable,duplicate-key,unnecessary-semicolon,global-variable-not-assigned,unused-variable,binary-op-exception,bad-format-string,anomalous-backslash-in-string,bad-open-mode"
+            ]         
+
+        }
+        }
+    }
+}   
