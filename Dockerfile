@@ -12,7 +12,7 @@
 FROM python:3.11-slim-bookworm as base
 
 # Allowing the argumenets to be read into the dockerfile. Ex:  .env > compose.yml > Dockerfile
-ARG POETRY_VERSION
+ARG POETRY_VERSION=1.5.1
 # true = development / false = production
 ARG DEV
 
@@ -22,17 +22,17 @@ WORKDIR /app
 # Use this page as a reference for python and poetry environment variables: https://docs.python.org/3/using/cmdline.html#envvar-PYTHONUNBUFFERED
 # Ensure the stdout and stderr streams are sent straight to terminal, then you can see the output of your application
 ENV PYTHONUNBUFFERED=1\
-    # Avoid the generation of .pyc files during package install
-    # Disable pip's cache, then reduce the size of the image
-    PIP_NO_CACHE_DIR=off \
-    # Save runtime because it is not look for updating pip version
-    PIP_DISABLE_PIP_VERSION_CHECK=on \
-    PIP_DEFAULT_TIMEOUT=100 \
-    # Disable poetry interaction
-    POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_CREATE=1 \
-    POETRY_VIRTUALENVS_IN_PROJECT=1 \
-    POETRY_CACHE_DIR=/tmp/poetry_cache
+  # Avoid the generation of .pyc files during package install
+  # Disable pip's cache, then reduce the size of the image
+  PIP_NO_CACHE_DIR=off \
+  # Save runtime because it is not look for updating pip version
+  PIP_DISABLE_PIP_VERSION_CHECK=on \
+  PIP_DEFAULT_TIMEOUT=100 \
+  # Disable poetry interaction
+  POETRY_NO_INTERACTION=1 \
+  POETRY_VIRTUALENVS_CREATE=1 \
+  POETRY_VIRTUALENVS_IN_PROJECT=1 \
+  POETRY_CACHE_DIR=/tmp/poetry_cache
 
 RUN pip install poetry==${POETRY_VERSION}
 
@@ -45,12 +45,12 @@ COPY pyproject.toml poetry.lock README.md ./
 # --with dev to install dev dependencies, we need test and linters in development environment
 # --mount, mount a folder for plugins with poetry cache, this will speed up the process of building the image
 RUN if [ {${DEV}} ]; then \
-      echo "Installing dev dependencies"; \
-      poetry install --no-root --with dev \
-    else \
-      echo "Skipping dev dependencies"; \
-      poetry install --no-root --without dev && rm -rf ${POETRY_CACHE_DIR}; \
-   fi
+  echo "Installing dev dependencies"; \
+  poetry install --no-root --with dev \
+  else \
+  echo "Skipping dev dependencies"; \
+  poetry install --no-root --without dev && rm -rf ${POETRY_CACHE_DIR}; \
+  fi
 
 # Set up our final runtime layer
 FROM python:3.11-slim-bookworm as runtime
@@ -68,7 +68,7 @@ RUN which pip && sleep 10
 # By adding /venv/bin to the PATH the dependencies in the virtual environment
 # are used
 ENV VIRTUAL_ENV=/venv \
-    PATH="/venv/bin:$PATH"
+  PATH="/venv/bin:$PATH"
 
 COPY --chown=${UID}:${GID} --from=base "/app/.venv" ${VIRTUAL_ENV}
 
