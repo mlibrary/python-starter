@@ -1,6 +1,6 @@
 services:
-  app:
-    build: 
+  python_app:
+    build:
       context: .
       target: runtime
       dockerfile: Dockerfile
@@ -15,3 +15,21 @@ services:
       - .:/app
     tty: true
     stdin_open: true
+    depends_on:
+      rabbitmq:
+          condition: service_healthy
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.13-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 5s
+      timeout: 10s
+      start_period: 30s
+      retries: 5
