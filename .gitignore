@@ -4,3 +4,7 @@
 .cache/
 .pytest_cache
 __pycache__
+.dotnet/
+.vscode-server
+.local
+.gitconfig
