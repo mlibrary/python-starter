@@ -9,3 +9,4 @@ __pycache__
 .local
 .gitconfig
 .venv
+.ssh
