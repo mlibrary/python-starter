@@ -13,9 +13,6 @@ FROM python:3.11-slim-bookworm as base
 
 # Allowing the argumenets to be read into the dockerfile. Ex:  .env > compose.yml > Dockerfile
 ARG POETRY_VERSION
-# true = development / false = production
-ARG DEV
-
 ARG UID=1000
 ARG GID=1000
 
@@ -31,6 +28,7 @@ WORKDIR /app
 
 CMD ["tail", "-f", "/dev/null"]
 
+# Both build and development need poetry, so it is its own step.
 FROM base as poetry
 
 RUN pip install poetry==${POETRY_VERSION}
@@ -51,11 +49,8 @@ ENV PYTHONUNBUFFERED=1\
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
 FROM poetry as build
-
-
 # Just copy the files needed to install the dependencies
 COPY pyproject.toml poetry.lock README.md ./
-
 
 # Poetry cache is used to avoid installing the dependencies every time the code changes, we will keep this folder in development environment and remove it in production
 # --no-root, poetry will install only the dependencies avoiding to install the project itself, we will install the project in the final layer
@@ -64,7 +59,7 @@ COPY pyproject.toml poetry.lock README.md ./
 # --mount, mount a folder for plugins with poetry cache, this will speed up the process of building the image
 RUN  poetry install --no-root --without dev && rm -rf ${POETRY_CACHE_DIR};
 
-
+# We want poetry on in development
 FROM poetry as development
 RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
    git
@@ -72,11 +67,10 @@ RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
 # Switch to the non-root user "user"
 USER app
 
+# We don't want poetry on in production, so we copy the needed files form the build stage
 FROM base as production
 # Switch to the non-root user "user"
 RUN mkdir -p /venv && chown ${UID}:${GID} /venv
-
-USER app
 
 # By adding /venv/bin to the PATH the dependencies in the virtual environment
 # are used
@@ -84,6 +78,6 @@ ENV VIRTUAL_ENV=/venv \
     PATH="/venv/bin:$PATH"
 
 COPY --chown=${UID}:${GID} . /app
-
 COPY --chown=${UID}:${GID} --from=build "/app/.venv" ${VIRTUAL_ENV}
 
+USER app
