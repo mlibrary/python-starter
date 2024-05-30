@@ -1,5 +1,4 @@
-# Remove this tests directory if you want to have tests inline with production
-# code
+# Remove this file if you want tests in a separate tests directory
 from python_starter.sample import Sample
 
 def test_add_one():
