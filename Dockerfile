@@ -61,8 +61,6 @@ RUN  poetry install --no-root --without dev && rm -rf ${POETRY_CACHE_DIR};
 
 # We want poetry on in development
 FROM poetry as development
-RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
-   git
 
 # Switch to the non-root user "user"
 USER app
