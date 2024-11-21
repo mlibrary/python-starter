@@ -2,13 +2,13 @@ services:
   app:
     build: 
       context: .
-      target: runtime
+      target: development
       dockerfile: Dockerfile
       args:
         UID: ${UID:-1000}
         GID: ${GID:-1000}
         DEV: ${DEV:-false}
-        POETRY_VERSION: ${POETRY_VERSION:-1.5.1}
+        POETRY_VERSION: ${POETRY_VERSION:-1.8.3}
     env_file:
       - .env
     volumes:
